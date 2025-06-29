@@ -95,6 +95,7 @@ class Ship:
 		self.fire_images = []
 		self.firing = False
 
+		# Load the images for the moving ship with thrusters
 		for itm in ['ship_flame1.png','ship_flame2.png']:
 			img = pygame.image.load(itm).convert_alpha()
 			img = pygame.transform.scale(img, (self.width, self.height))
@@ -182,6 +183,12 @@ def main(winx=600,winy=600):
 	ctimeout = 0
 	score = 0
 	max_rad = 50
+	life_icons = []
+	
+	for i in range(lives):
+		img = pygame.image.load('ship.png').convert_alpha()
+		img = pygame.transform.scale(img, (30, 20))
+		life_icons.append(img)
 
 	asteroids = spawn_asteroids(winx,winy,level,max_rad)
 
@@ -214,11 +221,13 @@ def main(winx=600,winy=600):
 					level_timeout = level_timeout * 2
 					game_over = True
 					asteroids = spawn_asteroids(winx,winy,level)
+					life_icons = []
 				else:
 					game_events[0] = False
 					ship = Ship(winx,winy)
 					asteroids = spawn_asteroids(winx,winy,level)
 					death_segments = []
+					life_icons = life_icons[:-1]
 
 		if not game_over:
 			ship.angle = angle
@@ -259,9 +268,11 @@ def main(winx=600,winy=600):
 
 		asteroids = nasteroids
 
+		# Player killed all of the asteroids.
 		if len(asteroids) == 0:
 			game_events[1] = True
 
+		# Process user input
 		events = pygame.event.get()
 		for e in events:
 			if game_over:
@@ -290,6 +301,14 @@ def main(winx=600,winy=600):
 		scoretext.update_y(10)
 		scoretext.update_text(str(f"Score: {score}"))
 		scoretext.draw(screen)
+
+		# Render the life icons
+		icx = 30
+		for icon in life_icons:
+			rot = pygame.transform.rotate(icon, 90)
+			rect = rot.get_rect(center=(icx, 50))
+			screen.blit(rot, rect)
+			icx += 50
 
 		if not game_over:
 			if game_events[0]:
