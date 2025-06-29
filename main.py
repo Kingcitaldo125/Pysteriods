@@ -2,7 +2,7 @@ import pygame
 import math
 
 from pygame.math import Vector2
-from os.path import join
+from random import choice
 
 class Bullet:
 	def __init__(self,x,y,angle):
@@ -33,13 +33,20 @@ class Ship:
 		self.winy = winy
 		self.position = Vector2(winx//2,winy//2)
 		self.velocity = Vector2(0,0)
-		self.friction_constant = 0.5 # how much speed the ship looses
+		self.friction_constant = 0.025 # how much speed the ship looses
 		self.angle = 0 # updated globally
 		self.width = winx // 20
 		self.height = winy // 25
 		self.bullets = []
 		self.image = pygame.image.load('ship.png').convert_alpha()
 		self.image = pygame.transform.scale(self.image, (self.width, self.height))
+		self.fire_images = []
+		self.firing = False
+
+		for itm in ['ship_flame1.png','ship_flame2.png']:
+			img = pygame.image.load(itm).convert_alpha()
+			img = pygame.transform.scale(img, (self.width, self.height))
+			self.fire_images.append(img)
 
 	def fire(self):
 		# only support one bullet for now
@@ -47,16 +54,49 @@ class Ship:
 			return
 
 		# Correct issue with angle being 'mirrored' for bullets
-		self.angle = 360 - self.angle
+		angle = 360 - self.angle
 		#print("angle",self.angle)
-		self.bullets.append(Bullet(self.position.x, self.position.y, self.angle))
+		self.bullets.append(Bullet(self.position.x, self.position.y, angle))
 
-	def update(self):
+	def move(self):
+		angle = math.radians(self.angle)
+		vec = (math.cos(angle), math.sin(angle) * -1)
+		#print(f"vec {vec}")
+		self.velocity.x += vec[0]
+		self.velocity.y += vec[1]
+
+		self.firing = True
+
+	def update(self, velocity_threshold=0.05):
 		self.position.x += self.velocity.x
 		self.position.y += self.velocity.y
 
-		self.velocity.x = max(0,self.velocity.x - self.friction_constant)
-		self.velocity.y = max(0,self.velocity.y - self.friction_constant)
+		#print("self.velocity.x",self.velocity.x)
+		#print("self.velocity.y",self.velocity.y)
+
+		if abs(self.velocity.x) >= velocity_threshold:
+			if self.velocity.x < 0:
+				self.velocity.x += self.friction_constant
+			else:
+				self.velocity.x -= self.friction_constant
+
+		if abs(self.velocity.y) >= velocity_threshold:
+			if self.velocity.y < 0:
+				self.velocity.y += self.friction_constant
+			else:
+				self.velocity.y -= self.friction_constant
+
+		if self.position.x < 0:
+			self.position.x = self.winx + self.position.x
+
+		if self.position.x > self.winx:
+			self.position.x = self.position.x - self.winx
+
+		if self.position.y < 0:
+			self.position.y = self.winy + self.position.y
+
+		if self.position.y > self.winy:
+			self.position.y = self.position.y - self.winy
 
 		bcpy = []
 		for bullet in self.bullets:
@@ -66,12 +106,15 @@ class Ship:
 		self.bullets = bcpy
 
 	def render(self,surface):
-		rot = pygame.transform.rotate(self.image, self.angle)
+		chosen_img = choice(self.fire_images) if self.firing else self.image
+		rot = pygame.transform.rotate(chosen_img, self.angle)
 		rect = rot.get_rect(center=(self.position.x, self.position.y))
 		surface.blit(rot, rect)
 
 		for bullet in self.bullets:
 			bullet.render(surface)
+
+		self.firing = False
 
 def main(winx=600,winy=600):
 	pygame.display.init()
@@ -97,6 +140,8 @@ def main(winx=600,winy=600):
 			elif e.type == pygame.KEYDOWN:
 				if e.key == pygame.K_SPACE:
 					ship.fire()
+				elif e.key == pygame.K_UP:
+					ship.move()
 				elif e.key == pygame.K_LEFT:
 					angle += rotate_velocity
 				elif e.key == pygame.K_RIGHT:
