@@ -8,9 +8,9 @@ class Bullet:
 	def __init__(self,x,y,angle):
 		self.x = x
 		self.y = y
-		self.velocity = 10
-		self.angle = angle
-		self.vec = Vector2(math.cos(self.angle),math.sin(self.angle))
+		self.velocity = 8
+		self.angle = math.radians(angle)
+		self.vec = (math.cos(self.angle), math.sin(self.angle))
 		self.line_length = 10
 
 	def out_of_bounds(self, winx, winy):
@@ -19,22 +19,24 @@ class Bullet:
 		return oob_x or oob_y
 
 	def update(self):
-		self.x += self.vec.x * self.velocity
-		self.y += self.vec.y * self.velocity
+		self.x += self.vec[0] * self.velocity
+		self.y += self.vec[1] * self.velocity
 
 	def render(self,surface):
-		start = (self.x,self.y)
-		end = (self.x + self.line_length, self.y + self.line_length)
-		pygame.draw.line(surface, "white", start, end)
+		start = (self.x, self.y)
+		end = (self.x + self.vec[0] * self.line_length, self.y + self.vec[1] * self.line_length)
+		pygame.draw.line(surface, "white", start, end, 3)
 
 class Ship:
 	def __init__(self,winx,winy):
+		self.winx = winx
+		self.winy = winy
 		self.position = Vector2(winx//2,winy//2)
 		self.velocity = Vector2(0,0)
 		self.friction_constant = 0.5 # how much speed the ship looses
-		self.angle = math.pi / 2
-		self.width = winx // 25
-		self.height = winy // 20
+		self.angle = 0 # updated globally
+		self.width = winx // 20
+		self.height = winy // 25
 		self.bullets = []
 		self.image = pygame.image.load('ship.png').convert_alpha()
 		self.image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -44,17 +46,24 @@ class Ship:
 		if len(self.bullets) > 0:
 			return
 
+		# Correct issue with angle being 'mirrored' for bullets
+		self.angle = 360 - self.angle
+		#print("angle",self.angle)
 		self.bullets.append(Bullet(self.position.x, self.position.y, self.angle))
 
-	def update(self,winx,winy):
+	def update(self):
 		self.position.x += self.velocity.x
 		self.position.y += self.velocity.y
 
 		self.velocity.x = max(0,self.velocity.x - self.friction_constant)
 		self.velocity.y = max(0,self.velocity.y - self.friction_constant)
 
+		bcpy = []
 		for bullet in self.bullets:
 			bullet.update()
+			if not bullet.out_of_bounds(self.winx, self.winy):
+				bcpy.append(bullet)
+		self.bullets = bcpy
 
 	def render(self,surface):
 		rot = pygame.transform.rotate(self.image, self.angle)
@@ -70,17 +79,15 @@ def main(winx=600,winy=600):
 
 	clock = pygame.time.Clock()
 	ship = Ship(winx,winy)
+	rotate_velocity = 10
 	angle = 0
 
 	done = False
 	while not done:
 		clock.tick(60)
-		
-		angle -= 1
-		if angle < 0:
-			angle = 359
-		angle = angle % 360
+
 		ship.angle = angle
+		ship.update()
 
 		events = pygame.event.get()
 		for e in events:
@@ -91,9 +98,9 @@ def main(winx=600,winy=600):
 				if e.key == pygame.K_SPACE:
 					ship.fire()
 				elif e.key == pygame.K_LEFT:
-					ship.rotate(-1)
+					angle += rotate_velocity
 				elif e.key == pygame.K_RIGHT:
-					ship.rotate(1)
+					angle -= rotate_velocity
 				elif e.key == pygame.K_ESCAPE:
 					done = True
 					break
@@ -101,6 +108,7 @@ def main(winx=600,winy=600):
 		screen.fill("black")
 		ship.render(screen)
 		pygame.display.flip()
+
 	pygame.display.quit()
 
 if __name__ == "__main__":
