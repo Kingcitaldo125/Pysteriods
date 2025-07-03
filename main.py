@@ -6,13 +6,14 @@ from random import choice, randrange, uniform
 from fontcontroller import FontController
 from rendertext import RenderText
 
-def spawn_asteroids(winx,winy,level,max_rad=50):
+def spawn_asteroids(winx,winy,level):
 	amount = randrange(level * 2, level * 4)
+	radii = [10,20,30,40,50]
 	asteroids = []
 	for i in range(amount):
 		velocityx = uniform(-1.0,1.0)
 		velocityy = uniform(-1.0,1.0)
-		rad = randrange(10,max_rad)
+		rad = choice(radii)
 		asteroids.append(Asteriod(winx, winy, velocityx, velocityy, rad))
 	return asteroids
 
@@ -182,7 +183,8 @@ def main(winx=600,winy=600):
 	level_timeout = 50
 	ctimeout = 0
 	score = 0
-	max_rad = 50
+	radii = [10,20,30,40,50]
+	max_rad = radii[-1]
 	life_icons = []
 	
 	for i in range(lives):
@@ -190,7 +192,7 @@ def main(winx=600,winy=600):
 		img = pygame.transform.scale(img, (30, 20))
 		life_icons.append(img)
 
-	asteroids = spawn_asteroids(winx,winy,level,max_rad)
+	asteroids = spawn_asteroids(winx,winy,level)
 
 	game_events = [False,False]
 	done = False
@@ -263,6 +265,17 @@ def main(winx=600,winy=600):
 				if ast.colliding(bullet.x, bullet.y, 1):
 					nasteroids.remove(ast)
 					ship.bullets.remove(bullet)
+					# If we can split the asteroid into two parts, do so
+					# Only do this if the radius of the current asteroid is large enough
+					if ast.rad > radii[0]:
+						for i in range(2):
+							new_rad = radii[radii.index(ast.rad) - 1]
+							new_x_velocity = 2 * abs(ast.velocityx) * uniform(-1.0,1.0)
+							new_y_velocity = 2 * abs(ast.velocityy) * uniform(-1.0,1.0)
+							nast = Asteriod(winx, winy, new_x_velocity, new_y_velocity, new_rad)
+							nast.x = ast.x
+							nast.y = ast.y
+							nasteroids.append(nast)
 					score += max(1,max_rad - ast.rad)
 					break
 
