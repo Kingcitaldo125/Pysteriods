@@ -84,7 +84,7 @@ class Ship:
 		self.winy = winy
 		self.position = Vector2(winx//2,winy//2)
 		self.velocity = Vector2(0,0)
-		self.friction_constant = 0.025 # how much speed the ship looses
+		self.friction_constant = 0.02 # how much speed the ship looses
 		self.angle = 0 # updated globally
 		self.vec = (math.cos(self.angle), math.sin(self.angle) * -1)
 		self.width = winx // 20
@@ -125,9 +125,9 @@ class Ship:
 		self.position.x += self.velocity.x
 		self.position.y += self.velocity.y
 
-		#print("self.velocity.x",self.velocity.x)
-		#print("self.velocity.y",self.velocity.y)
-
+		# Slow down the ship.
+		# Gradually make the ship's x and y velocities approach '0'
+		# Use a friction/mass constant/heuristic to simulate the force acting on/against the ship.
 		if abs(self.velocity.x) >= velocity_threshold:
 			if self.velocity.x < 0:
 				self.velocity.x += self.friction_constant
@@ -164,7 +164,7 @@ class Ship:
 		self.firing = False
 
 def show_main_menu(font_controller,winx,winy,screen,clock):
-	asteroids = spawn_asteroids(winx,winy,1)
+	asteroids = spawn_asteroids(winx,winy,2)
 
 	hx = winx//2
 	hy = winy//2
@@ -276,6 +276,16 @@ def main(winx=600,winy=600):
 				game_events[1] = False
 				level += 1
 				asteroids = spawn_asteroids(winx,winy,level)
+				ast_collide = True
+				# While there is an asteroid 'spawn camping' the player's ship, re-spawn asteroids
+				while ast_collide:
+					ast_collide = False
+					for ast in asteroids:
+						if ast.colliding(ship.position.x, ship.position.y, shiprad):
+							ast_collide = True
+							break
+					if ast_collide:
+						asteroids = spawn_asteroids(winx,winy,level)
 
 			# Process a death change
 			if game_events[0]:
@@ -288,7 +298,6 @@ def main(winx=600,winy=600):
 				else:
 					game_events[0] = False
 					ship = Ship(winx,winy)
-					asteroids = spawn_asteroids(winx,winy,level)
 					death_segments = []
 					life_icons = life_icons[:-1]
 
@@ -296,6 +305,7 @@ def main(winx=600,winy=600):
 			ship.angle = angle
 			ship.update()
 
+		# Render the bits of the destroyed ship
 		for seg in death_segments:
 			seg[0][0] += uniform(-1.0,1.0)
 			seg[0][1] += uniform(-1.0,1.0)
