@@ -173,7 +173,7 @@ def main(winx=600,winy=600):
 	ship = Ship(winx,winy)
 	shiprad = (ship.width + ship.height) // 2
 	shiprad = shiprad * 0.75
-	rotate_velocity = 10
+	rotate_velocity = 15
 	angle = 0
 
 	death_segments = []
