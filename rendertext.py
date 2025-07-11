@@ -9,7 +9,7 @@ class RenderText():
 		background_col: tuple,
 		x=0,
 		y=0,
-		text="",
+		text=""
 	):
 		self.font = font_controller.get_instance()
 		self.text = text
@@ -27,8 +27,14 @@ class RenderText():
 	def update_text(self, newtext):
 		self.text = newtext
 
-	def draw(self, screen):
-		xtext = self.font.render(self.text, False, self.foreground_col, self.background_col)
+	def get_render_rect(self,bold=False):
+		xcol = self.foreground_col if not bold else "white"
+		xtext = self.font.render(self.text, False, xcol, self.background_col)
+		return xtext.get_rect()
+
+	def draw(self, screen, bold=False):
+		xcol = self.foreground_col if not bold else "white"
+		xtext = self.font.render(self.text, False, xcol, self.background_col)
 		xtext_rect = xtext.get_rect()
 		xtext_rect.center = (self.x, self.y)
 		screen.blit(xtext, xtext_rect)

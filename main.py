@@ -163,6 +163,65 @@ class Ship:
 
 		self.firing = False
 
+def show_main_menu(font_controller,winx,winy,screen,clock):
+	asteroids = spawn_asteroids(winx,winy,1)
+
+	hx = winx//2
+	hy = winy//2
+
+	playtext = RenderText(font_controller, "grey", "black")
+	playtext.update_x(hx)
+	playtext.update_y(hy)
+	playtext.update_text("Play")
+
+	rx,ry,rw,rh = playtext.get_render_rect()
+
+	playpos_x = hx - rw // 2
+	playpos_y = hy - rh // 2
+
+	gamename = RenderText(font_controller, "white", "black")
+	gamename.update_x(hx)
+	gamename.update_y(hy - winy//6)
+	gamename.update_text("Pysteroids")
+
+	collide = False
+	leftpress = False
+	while True:
+		clock.tick(60)
+
+		if collide and leftpress:
+			break
+
+		for ast in asteroids:
+			ast.update()
+
+		mx,my = pygame.mouse.get_pos()
+		leftpress,midpress,rightpress = pygame.mouse.get_pressed()
+
+		collide_x = mx >= playpos_x and mx <= playpos_x + rw
+		collide_y = my >= playpos_y and my <= playpos_y + rh
+		collide = collide_x and collide_y
+
+		events = pygame.event.get()
+		for e in events:
+			if e.type == pygame.QUIT:
+				return True
+			elif e.type == pygame.KEYDOWN:
+				if e.key == pygame.K_ESCAPE:
+					return True
+
+		screen.fill("black")
+
+		for ast in asteroids:
+			ast.render(screen)
+
+		gamename.draw(screen)
+		playtext.draw(screen,collide)
+
+		pygame.display.flip()
+
+	return False
+
 def main(winx=600,winy=600):
 	pygame.display.init()
 	screen = pygame.display.set_mode((winx,winy))
@@ -186,7 +245,11 @@ def main(winx=600,winy=600):
 	radii = [10,20,30,40,50]
 	max_rad = radii[-1]
 	life_icons = []
-	
+	game_events = [False,False]
+
+	menu_res = show_main_menu(font_controller,winx,winy,screen,clock)
+	done = menu_res
+
 	for i in range(lives):
 		img = pygame.image.load('ship.png').convert_alpha()
 		img = pygame.transform.scale(img, (30, 20))
@@ -194,8 +257,6 @@ def main(winx=600,winy=600):
 
 	asteroids = spawn_asteroids(winx,winy,level)
 
-	game_events = [False,False]
-	done = False
 	while not done:
 		tick = clock.tick(60)
 		#print(f"tick {tick}")

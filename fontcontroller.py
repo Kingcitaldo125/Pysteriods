@@ -4,7 +4,7 @@ class FontController(object):
 	font_instance = None
 
 	def __init__(self):
-		print("Call 'get_instance'")
+		print("")
 
 	@classmethod
 	def quit(cls):
