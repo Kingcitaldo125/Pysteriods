@@ -6,33 +6,6 @@ from random import choice, randrange, uniform
 from fontcontroller import FontController
 from rendertext import RenderText
 
-def spawn_asteroids(winx,winy,level):
-	amount = randrange(level * 2, level * 4)
-	radii = [10,20,30,40,50]
-	asteroids = []
-	for i in range(amount):
-		velocityx = uniform(-1.0,1.0)
-		velocityy = uniform(-1.0,1.0)
-		rad = choice(radii)
-		asteroids.append(Asteriod(winx, winy, velocityx, velocityy, rad))
-	return asteroids
-
-def wrap_position(winx, winy, xpos, ypos, rad=1):
-	# Checks to make the ship move to the other side of the screen
-	if xpos < -rad:
-		xpos = winx + rad
-
-	if xpos > winx + rad:
-		xpos = -rad
-
-	if ypos < -rad:
-		ypos = winy + rad
-
-	if ypos > winy + rad:
-		ypos = -rad
-
-	return [xpos, ypos]
-
 class Asteriod:
 	def __init__(self,winx,winy,velocityx,velocityy,rad):
 		self.x = randrange(0,winx)
@@ -162,6 +135,33 @@ class Ship:
 			bullet.render(surface)
 
 		self.firing = False
+
+def spawn_asteroids(winx,winy,level):
+	amount = randrange(level * 2, level * 4)
+	radii = [10,20,30,40,50]
+	asteroids = []
+	for i in range(amount):
+		velocityx = uniform(-1.0,1.0)
+		velocityy = uniform(-1.0,1.0)
+		rad = choice(radii)
+		asteroids.append(Asteriod(winx, winy, velocityx, velocityy, rad))
+	return asteroids
+
+def wrap_position(winx, winy, xpos, ypos, rad=1):
+	# Checks to make the ship move to the other side of the screen
+	if xpos < -rad:
+		xpos = winx + rad
+
+	if xpos > winx + rad:
+		xpos = -rad
+
+	if ypos < -rad:
+		ypos = winy + rad
+
+	if ypos > winy + rad:
+		ypos = -rad
+
+	return [xpos, ypos]
 
 def show_main_menu(font_controller,winx,winy,screen,clock):
 	asteroids = spawn_asteroids(winx,winy,2)
@@ -417,3 +417,4 @@ def main(winx=600,winy=600):
 
 if __name__ == "__main__":
 	main()
+
