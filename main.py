@@ -68,6 +68,7 @@ class Ship:
 		self.image = pygame.transform.scale(self.image, (self.width, self.height))
 		self.fire_images = []
 		self.firing = False
+		self.destroyed = False
 
 		# Load the images for the moving ship with thrusters
 		for itm in ['ship_flame1.png','ship_flame2.png']:
@@ -77,7 +78,7 @@ class Ship:
 
 	def fire(self):
 		# only support one bullet for now
-		if len(self.bullets) > 0:
+		if len(self.bullets) > 0 or self.destroyed:
 			return
 
 		# Correct issue with angle being 'mirrored' for bullets
@@ -322,6 +323,7 @@ def main(winx=600,winy=600):
 			# Ship collides with Asteriod
 			if ast.colliding(ship.position.x, ship.position.y, shiprad) and not game_events[0]:
 				game_events[0] = True
+				ship.destroyed = True
 				# Render the destroyed ship segments
 				for i in range(3):
 					endx = ship.position.x + ship.vec[0] * ship.line_length

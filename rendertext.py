@@ -29,8 +29,6 @@ class RenderText():
 
 	def get_render_rect(self,bold=False):
 		xcol = self.foreground_col if not bold else (255,255,255)
-		print("xcol",xcol)
-		print("background_col",self.background_col)
 		xtext = self.font.render(self.text, False, xcol, self.background_col)
 		return xtext.get_rect()
 
