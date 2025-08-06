@@ -26,7 +26,7 @@ class Asteriod:
 		self.x,self.y = wrap_position(self.winx, self.winy, self.x, self.y, self.rad)
 
 	def render(self, surface):
-		pygame.draw.circle(surface, "white", (self.x, self.y), self.rad, 1)
+		pygame.draw.circle(surface, (255,255,255), (int(self.x), int(self.y)), self.rad, 1)
 
 class Bullet:
 	def __init__(self,x,y,angle):
@@ -49,7 +49,7 @@ class Bullet:
 	def render(self,surface):
 		start = (self.x, self.y)
 		end = (self.x + self.vec[0] * self.line_length, self.y + self.vec[1] * self.line_length)
-		pygame.draw.line(surface, "white", start, end, 3)
+		pygame.draw.line(surface, (255,255,255), start, end, 3)
 
 class Ship:
 	def __init__(self,winx,winy):
@@ -169,7 +169,7 @@ def show_main_menu(font_controller,winx,winy,screen,clock):
 	hx = winx//2
 	hy = winy//2
 
-	playtext = RenderText(font_controller, "grey", "black")
+	playtext = RenderText(font_controller, (189,189,189), (0,0,0))
 	playtext.update_x(hx)
 	playtext.update_y(hy)
 	playtext.update_text("Play")
@@ -179,7 +179,7 @@ def show_main_menu(font_controller,winx,winy,screen,clock):
 	playpos_x = hx - rw // 2
 	playpos_y = hy - rh // 2
 
-	gamename = RenderText(font_controller, "white", "black")
+	gamename = RenderText(font_controller, (255,255,255), (0,0,0))
 	gamename.update_x(hx)
 	gamename.update_y(hy - winy//6)
 	gamename.update_text("Pysteroids")
@@ -210,7 +210,7 @@ def show_main_menu(font_controller,winx,winy,screen,clock):
 				if e.key == pygame.K_ESCAPE:
 					return True
 
-		screen.fill("black")
+		screen.fill((0,0,0))
 
 		for ast in asteroids:
 			ast.render(screen)
@@ -377,10 +377,10 @@ def main(winx=600,winy=600):
 					done = True
 					break
 
-		screen.fill("black")
+		screen.fill((0,0,0))
 
 		# Render the score
-		scoretext = RenderText(font_controller, "white", "black")
+		scoretext = RenderText(font_controller, (255,255,255), (0,0,0))
 		scoretext.update_x(50)
 		scoretext.update_y(10)
 		scoretext.update_text(str(f"Score: {score}"))
@@ -398,11 +398,11 @@ def main(winx=600,winy=600):
 			if game_events[0]:
 				for seg in death_segments:
 					start,end = seg
-					pygame.draw.line(screen, "white", start, end, 3)
+					pygame.draw.line(screen, (255,255,255), start, end, 3)
 			else:
 				ship.render(screen)
 		else:
-			rendertext = RenderText(font_controller, "white", "black")
+			rendertext = RenderText(font_controller, (255,255,255), (0,0,0))
 			rendertext.update_x(winx//2)
 			rendertext.update_y(winy//2)
 			rendertext.update_text(str("Game Over."))
